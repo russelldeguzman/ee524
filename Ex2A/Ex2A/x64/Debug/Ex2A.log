@@ -1,0 +1,24 @@
+﻿  Preprocessing: device.cl
+  Ignoring -TARGETOS option - not supported for 64-bit version of this tool
+  Setting target instruction set architecture to: Default (Advanced Vector Extension 2 (AVX2))
+  OpenCL Intel CPU device was found!
+  Device name: Intel(R) Core(TM) i5-6500T CPU @ 2.50GHz
+  Device version: OpenCL 2.1 (Build 611)
+  Device vendor: Intel(R) Corporation
+  Device profile: FULL_PROFILE
+  Compilation started
+  Compilation done
+  Linking started
+  Linking done
+  Device build started
+  Device build done
+  Done.
+  Failed to get kernel names for work group info
+  Build succeeded!
+  
+  host.cpp
+c:\users\deguzr\source\repos\ex2a\ex2a\host.cpp(49): warning C4018: '<': signed/unsigned mismatch
+c:\users\deguzr\source\repos\ex2a\ex2a\host.cpp(72): warning C4018: '<': signed/unsigned mismatch
+  Ex2A.vcxproj -> C:\Users\deguzr\source\repos\Ex2A\x64\Debug\Ex2A.exe
+  device.cl
+          1 file(s) copied.
