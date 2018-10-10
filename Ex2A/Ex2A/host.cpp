@@ -3,12 +3,23 @@
 #include<stdlib.h>
 #include"CL/cl.h"
 #include <string.h>
+#include "read_source.h"
 #define ERR 0xdeadbeef
+#define NUM_ITEMS	16
+#define BUFFER_SIZE (NUM_ITEMS * sizeof(float))
+enum {
+	WORK_DIM_0,
+	NUM_WORK_DIMS,
+};
 
 static const char s_target_platform[] = "Intel(R) OpenCL";
 static const char s_device_name_substring[] = "Intel";
+const size_t global_work_size[NUM_WORK_DIMS] = { NUM_ITEMS };
+const size_t local_work_size[NUM_WORK_DIMS] = { NUM_ITEMS };
 
 static char * _get_platform_name(cl_platform_id platform_id);
+static bool verifyResults(float *p_mappedBufferIN, float *p_mappedBufferOut, cl_int numValues);
+
 
 int main(int argc, char** argv) 
 {
@@ -33,6 +44,19 @@ int main(int argc, char** argv)
 	cl_uint total_devices = 0;
 	cl_context context = NULL;
 	cl_context_properties context_properties = NULL;
+	char * file_contents = NULL;
+	size_t file_size = 0;
+	cl_program program = NULL;
+	cl_command_queue command_queue = NULL;
+	cl_kernel kernel = NULL;
+	float * in_buf_a;
+	float * in_buf_b;
+	float * out_buf;
+	cl_mem bufa = NULL;
+	cl_mem bufb = NULL;
+	cl_mem outbuf = NULL;
+	cl_uint work_dim = 0;
+	float * mapped_buffer = NULL;
 
 	// Get Platform Info
 	clStatus |= clGetPlatformIDs(0, NULL, &num_platforms);
@@ -121,11 +145,121 @@ int main(int argc, char** argv)
 	}
 	//create a context
 	context = clCreateContext(&context_properties, num_devices, device_list, NULL, NULL, &clStatus);
+	file_contents = read_source("vecadd_anyD.cl", &file_size);
+	program = clCreateProgramWithSource(context, 1, (const char **) &file_contents, &file_size, NULL);
+	if (clBuildProgram(program,1,&target_device_id,"-cl-std=CL2.0",NULL,NULL) != CL_SUCCESS)
+	{
+		printf("failure to build program\n");
+		exit(-1);
+	}
+	else {
+		printf("Success building program\n");
+	}
+	command_queue = clCreateCommandQueueWithProperties(context, target_device_id, NULL, &clStatus);//default properties
+	if (clStatus != CL_SUCCESS)
+	{
+		printf("Error creating command queue\n");
+		exit(-1);
+	}
+	kernel = clCreateKernel(program, "vecadd_anyD", &clStatus);
+	if (clStatus != CL_SUCCESS)
+	{
+		printf("Error creating kernel\n");
+		exit(-1);
+	}
+	printf("succesfully built command queue and kernel\n");
 
+	in_buf_a = (float *)_aligned_malloc(BUFFER_SIZE, 4096);
+	in_buf_b = (float *)_aligned_malloc(BUFFER_SIZE , 4096);
+	out_buf = (float *)_aligned_malloc(BUFFER_SIZE , 4096);
+	
+	//I'm hardcoding example buffers here...
+	//We will add together two buffers with the same values
+	for (int i = 0; i < NUM_ITEMS; i++)
+	{
+		in_buf_a[i] = i;
+		in_buf_b[i] = i;
+	}
+
+	bufa = clCreateBuffer(context, CL_MEM_USE_HOST_PTR, BUFFER_SIZE, (void*)in_buf_a, &clStatus);
+	if (clStatus != CL_SUCCESS) 
+	{
+		printf("buffer allocation failed\n");
+		exit(-1);
+
+	}
+
+	bufb = clCreateBuffer(context, CL_MEM_USE_HOST_PTR, BUFFER_SIZE, (void*)in_buf_b, &clStatus);
+	if (clStatus != CL_SUCCESS)
+	{
+		printf("buffer allocation failed\n");
+		exit(-1);
+
+	}
+
+	outbuf = clCreateBuffer(context, CL_MEM_USE_HOST_PTR, BUFFER_SIZE, (void*)out_buf, &clStatus);
+	if (clStatus != CL_SUCCESS)
+	{
+		printf("buffer allocation failed\n");
+		exit(-1);
+	}
+	
+	printf("Successfully allocated buffers\n");
+	clStatus = clSetKernelArg(kernel, 0, sizeof(cl_mem), &bufa);
+	if (clStatus != CL_SUCCESS) {
+		printf("failed to set kernel args %d\n", clStatus);
+		exit(-1);
+	}
+	if (clSetKernelArg(kernel, 1, sizeof(cl_mem), &bufb) != CL_SUCCESS) {
+		printf("failed to set kernel args\n");
+		exit(-1);
+	}
+	if (clSetKernelArg(kernel, 2, sizeof(cl_mem), &outbuf) != CL_SUCCESS) {
+		printf("failed to set kernel args\n");
+		exit(-1);
+	}
+	
+	clStatus = clEnqueueNDRangeKernel(command_queue, kernel, NUM_WORK_DIMS, NULL, global_work_size, local_work_size, 0, NULL, NULL);
+	if (clStatus != CL_SUCCESS)
+	{
+		printf("failed to enquee kernel\n");
+		exit(-1);
+	}
+	if (clFinish(command_queue) != CL_SUCCESS)
+	{
+		printf("Kernel OP failed\n");
+		exit(-1);
+	}
+	mapped_buffer = (float *)clEnqueueMapBuffer(command_queue, outbuf, CL_TRUE, CL_MAP_READ, 0, BUFFER_SIZE, 0, NULL, NULL, &clStatus);
+	if (clStatus != CL_SUCCESS)
+	{
+		printf("Enqueing map buffer failed\n");
+		exit(-1);
+	}
+	clStatus = clEnqueueUnmapMemObject(command_queue, outbuf, mapped_buffer, 0, NULL, NULL);
+	if (clStatus != CL_SUCCESS)
+	{
+		printf("Unmapping buffer failed\n");
+		exit(-1);
+	}
+
+	if (verifyResults(in_buf_a, mapped_buffer, NUM_ITEMS))
+	{
+		printf("Verified Kernel Success!\n");
+	}
+	else 
+	{
+		printf("fail :(\n");
+	}
+
+	_aligned_free(in_buf_a);
+	_aligned_free(in_buf_b);
+	_aligned_free(out_buf);
 	if (platform_name != NULL)
 	{
 		free(platform_name);
 	}
+	free(file_contents);
 	free(platforms);
 	free(device_list);
 }
@@ -138,4 +272,19 @@ static char * _get_platform_name(cl_platform_id platform_id)
 	pn = (char *)malloc(sizeof(char) * param_size);
 	clGetPlatformInfo(platform_id, CL_PLATFORM_NAME, param_size, pn, NULL);
 	return pn;
+}
+
+static bool verifyResults(float *p_mappedBufferIN, float *p_mappedBufferOut, cl_int numValues)
+{
+	bool ret = true;
+	for (int i = 0; i < numValues; i++) {
+		float expected_val = (p_mappedBufferIN[i] * 2); //This is the same as adding the two identical input buffers
+		if (expected_val != p_mappedBufferOut[i])
+		{
+			ret = false;
+			break;
+		}
+		printf("Expected Value: %f, Output Value: %f\n", expected_val, p_mappedBufferOut[i]);
+	}
+	return ret;
 }

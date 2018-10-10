@@ -17,8 +17,15 @@
   Build succeeded!
   
   host.cpp
-c:\users\deguzr\source\repos\ex2a\ex2a\host.cpp(49): warning C4018: '<': signed/unsigned mismatch
-c:\users\deguzr\source\repos\ex2a\ex2a\host.cpp(72): warning C4018: '<': signed/unsigned mismatch
+c:\users\deguzr\source\repos\ex2a\ex2a\read_source.h(45): warning C4477: 'printf' : format string '%ld' requires an argument of type 'long', but variadic argument 2 has type 'size_t'
+  c:\users\deguzr\source\repos\ex2a\ex2a\read_source.h(45): note: consider using '%zd' in the format string
+c:\users\deguzr\source\repos\ex2a\ex2a\read_source.h(16): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  c:\program files (x86)\windows kits\10\include\10.0.17134.0\ucrt\stdio.h(208): note: see declaration of 'fopen'
+c:\users\deguzr\source\repos\ex2a\ex2a\host.cpp(75): warning C4018: '<': signed/unsigned mismatch
+c:\users\deguzr\source\repos\ex2a\ex2a\host.cpp(98): warning C4018: '<': signed/unsigned mismatch
+c:\users\deguzr\source\repos\ex2a\ex2a\host.cpp(180): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+c:\users\deguzr\source\repos\ex2a\ex2a\host.cpp(181): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
   Ex2A.vcxproj -> C:\Users\deguzr\source\repos\Ex2A\x64\Debug\Ex2A.exe
   device.cl
-          1 file(s) copied.
+  vecadd_anyD.cl
+          2 file(s) copied.
