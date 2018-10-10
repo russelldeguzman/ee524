@@ -1,0 +1,31 @@
+﻿  Preprocessing: device.cl
+  Ignoring -TARGETOS option - not supported for 64-bit version of this tool
+  Setting target instruction set architecture to: Default (Advanced Vector Extension 2 (AVX2))
+  OpenCL Intel CPU device was found!
+  Device name: Intel(R) Core(TM) i5-6500T CPU @ 2.50GHz
+  Device version: OpenCL 2.1 (Build 611)
+  Device vendor: Intel(R) Corporation
+  Device profile: FULL_PROFILE
+  Compilation started
+  Compilation done
+  Linking started
+  Linking done
+  Device build started
+  Device build done
+  Done.
+  Failed to get kernel names for work group info
+  Build succeeded!
+  
+  host.cpp
+c:\users\deguzr\source\repos\ex2\ex2a\read_source.h(45): warning C4477: 'printf' : format string '%ld' requires an argument of type 'long', but variadic argument 2 has type 'size_t'
+  c:\users\deguzr\source\repos\ex2\ex2a\read_source.h(45): note: consider using '%zd' in the format string
+c:\users\deguzr\source\repos\ex2\ex2a\read_source.h(16): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  c:\program files (x86)\windows kits\10\include\10.0.17134.0\ucrt\stdio.h(208): note: see declaration of 'fopen'
+c:\users\deguzr\source\repos\ex2\ex2a\host.cpp(75): warning C4018: '<': signed/unsigned mismatch
+c:\users\deguzr\source\repos\ex2\ex2a\host.cpp(98): warning C4018: '<': signed/unsigned mismatch
+c:\users\deguzr\source\repos\ex2\ex2a\host.cpp(176): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+c:\users\deguzr\source\repos\ex2\ex2a\host.cpp(177): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+  Ex2A.vcxproj -> C:\Users\deguzr\source\repos\Ex2\x64\Debug\Ex2A.exe
+  device.cl
+  vecadd_anyD.cl
+          2 file(s) copied.
