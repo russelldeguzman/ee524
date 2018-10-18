@@ -182,7 +182,10 @@ int main(int argc, char** argv)
 	{
 		printf("buffer allocation failed\n");
 		exit(-1);
-
+	}
+	else
+	{
+		printf("created buffer a\n");
 	}
 
 	bufb = clCreateBuffer(context, CL_MEM_USE_HOST_PTR, BUFFER_SIZE, (void*)in_buf_b, &clStatus);
@@ -192,14 +195,21 @@ int main(int argc, char** argv)
 		exit(-1);
 
 	}
-
+	else
+	{
+		printf("created buffer b\n");
+	}
 	outbuf = clCreateBuffer(context, CL_MEM_USE_HOST_PTR, BUFFER_SIZE, (void*)out_buf, &clStatus);
 	if (clStatus != CL_SUCCESS)
 	{
 		printf("buffer allocation failed\n");
 		exit(-1);
 	}
-	
+	else
+	{
+		printf("output buffer\n");
+	}
+
 	printf("Successfully allocated buffers\n");
 	clStatus = clSetKernelArg(kernel, 0, sizeof(cl_mem), &bufa);
 	if (clStatus != CL_SUCCESS) {
@@ -214,6 +224,7 @@ int main(int argc, char** argv)
 		printf("failed to set kernel args\n");
 		exit(-1);
 	}
+	printf("Sucssesfully set kernel args\n");
 	
 	clStatus = clEnqueueNDRangeKernel(command_queue, kernel, NUM_WORK_DIMS, NULL, global_work_size, local_work_size, 0, NULL, NULL);
 	if (clStatus != CL_SUCCESS)
@@ -221,24 +232,28 @@ int main(int argc, char** argv)
 		printf("failed to enquee kernel\n");
 		exit(-1);
 	}
+	printf("enqueued kernel op\n");
 	if (clFinish(command_queue) != CL_SUCCESS)
 	{
 		printf("Kernel OP failed\n");
 		exit(-1);
 	}
+	printf("kernel op finished!\n");
 	mapped_buffer = (float *)clEnqueueMapBuffer(command_queue, outbuf, CL_TRUE, CL_MAP_READ, 0, BUFFER_SIZE, 0, NULL, NULL, &clStatus);
 	if (clStatus != CL_SUCCESS)
 	{
 		printf("Enqueing map buffer failed\n");
 		exit(-1);
 	}
+	printf("Mapping buffer...\n");
 	clStatus = clEnqueueUnmapMemObject(command_queue, outbuf, mapped_buffer, 0, NULL, NULL);
 	if (clStatus != CL_SUCCESS)
 	{
 		printf("Unmapping buffer failed\n");
 		exit(-1);
 	}
-
+	printf("Unmapping buffer...\n");
+	printf("Verifying results...\n");
 	if (verifyResults(in_buf_a, mapped_buffer, NUM_ITEMS))
 	{
 		printf("Verified Kernel Success!\n");
